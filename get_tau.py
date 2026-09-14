@@ -7,13 +7,15 @@ import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 from datetime import datetime
 
-from fyodor import download_nc, rename_nc, pwv
+
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 if str(REPO_ROOT) not in sys.path:
 	sys.path.insert(0, str(REPO_ROOT))
 
-from python_script.goes_lv_query import get_goes_data  # noqa: E402
+from fyodor.fyodor import download_nc, rename_nc, pwv
+
+from goes_lv_query import get_goes_data  # noqa: E402
 
 # start_date = "2025-12-27T00:00:00Z"
 # end_date = "2025-12-27T01:00:00Z"
@@ -42,12 +44,12 @@ def convert_pwv_to_tau(pwv,a=0.04,b=0.017):
 
 
 if __name__ == "__main__":
-	glob_start_date = "2026-09-04T01:00:00Z"
-	glob_end_date = "2026-09-05T01:00:00Z"
+	glob_start_date = "2026-02-10T00:00:00Z"
+	glob_end_date = "2026-02-10T23:59:00Z"
 	fetch_goes_data(glob_start_date,glob_end_date,sat=19)
 	fetch_goes_data(glob_start_date,glob_end_date,sat=18)
-	directory_19 = '/Users/golecjoe/Documents/Projects/pwv_project/tau_program/goes_download_19'
-	directory_18 = '/Users/golecjoe/Documents/Projects/pwv_project/tau_program/goes_download_18'
+	directory_19 = '/Users/golecjoe/Documents/Projects/LMT-opacity-GOES/goes_download_19'
+	directory_18 = '/Users/golecjoe/Documents/Projects/LMT-opacity-GOES/goes_download_18'
 
 	files_19 = sorted(Path(directory_19).glob("*.nc"))
 	files_18 = sorted(Path(directory_18).glob("*.nc"))
@@ -109,8 +111,8 @@ if __name__ == "__main__":
 	# 	)
 
 	x_19 = [datetime.strptime(d, "%Y-%m-%d %H:%M:%S") for d in out_date_19]
-	plot_start = datetime.strptime("2026-09-04 02:00:00", "%Y-%m-%d %H:%M:%S")
-	plot_end = datetime.strptime("2026-09-05 00:00:00", "%Y-%m-%d %H:%M:%S")
+	plot_start = datetime.strptime("2026-02-19 00:00:00", "%Y-%m-%d %H:%M:%S")
+	plot_end = datetime.strptime("2026-02-19 23:59:00", "%Y-%m-%d %H:%M:%S")
 
 	# Drop NaNs/None before plotting to avoid skewed limits.
 	finite_pairs = [
@@ -124,8 +126,8 @@ if __name__ == "__main__":
 	x_plot_19, tau_plot_19 = zip(*finite_pairs)
 
 	x_18 = [datetime.strptime(d, "%Y-%m-%d %H:%M:%S") for d in out_date_18]
-	plot_start = datetime.strptime("2026-09-04 02:00:00", "%Y-%m-%d %H:%M:%S")
-	plot_end = datetime.strptime("2026-09-05 00:00:00", "%Y-%m-%d %H:%M:%S")
+	plot_start = datetime.strptime("2026-02-19 00:00:00", "%Y-%m-%d %H:%M:%S")
+	plot_end = datetime.strptime("2026-02-19 23:59:00", "%Y-%m-%d %H:%M:%S")
 
 	# Drop NaNs/None before plotting to avoid skewed limits.
 	finite_pairs = [
@@ -140,7 +142,7 @@ if __name__ == "__main__":
 
 	# Optionally export cleaned data.
 	export_csv = True
-	csv_path = Path(__file__).resolve().parent / "tau_export.csv"
+	csv_path = Path(__file__).resolve().parent / "tau_export_goes19.csv"
 	if export_csv:
 		with open(csv_path, "w", newline="") as f:
 			writer = csv.writer(f)
@@ -148,6 +150,15 @@ if __name__ == "__main__":
 			for t, v in zip(x_plot_19, tau_plot_19):
 				writer.writerow([t.isoformat(sep=" "), v])
 		print(f"Wrote {len(x_plot_19)} rows to {csv_path}")
+
+	csv_path = Path(__file__).resolve().parent / "tau_export_goes18.csv"
+	if export_csv:
+		with open(csv_path, "w", newline="") as f:
+			writer = csv.writer(f)
+			writer.writerow(["timestamp", "tau"])
+			for t, v in zip(x_plot_18, tau_plot_18):
+				writer.writerow([t.isoformat(sep=" "), v])
+		print(f"Wrote {len(x_plot_18)} rows to {csv_path}")
 
 	# Plot
 	fig, ax = plt.subplots()

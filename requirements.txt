@@ -1,0 +1,8 @@
+astropy
+beautifulsoup4
+matplotlib
+netCDF4
+numpy
+requests
+s3fs
+wget
