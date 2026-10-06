@@ -90,11 +90,18 @@ def prune_cache(directory: Path, cutoff_time: datetime) -> int:
     return removed_count
 
 
+# def convert_pwv_to_tau(
+#     pwv_values: Sequence[float], a: float = 0.04, b: float = 0.017
+# ) -> list[float]:
+#     """Convert precipitable water vapor in millimeters to tau at 220 GHz."""
+#     return [(a * float(value)) + b for value in pwv_values]
+
 def convert_pwv_to_tau(
-    pwv_values: Sequence[float], a: float = 0.04, b: float = 0.017
+    pwv_values: Sequence[float], a: float = 1.096E-3, b: float = 0.0333, c: float = 0.0111
 ) -> list[float]:
     """Convert precipitable water vapor in millimeters to tau at 220 GHz."""
-    return [(a * float(value)) + b for value in pwv_values]
+    # a, b, and c values were determined using am
+    return [(a * float(value)**2) + (b * float(value))+ c for value in pwv_values]
 
 
 def calculate_tau(directory: Path, start_time: datetime, end_time: datetime):
